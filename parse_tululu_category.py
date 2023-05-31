@@ -77,13 +77,11 @@ def parse_book_page(book_id, soup, directory='books/'):
     genres_selector = '.tabs tr td.ow_px_td #content span.d_book a'
     genres_tag = soup.select(genres_selector)
     genres = []
-    if genres_tag:
-        genres = [genre.text for genre in genres_tag]
+    genres = [genre.text for genre in genres_tag if genres_tag]
     comments_selector = '.tabs tr td.ow_px_td #content .texts span'
     comments_tag = soup.select(comments_selector)
     comments = []
-    if comments_tag:
-        comments = [comment.text for comment in comments_tag]
+    comments = [comment.text for comment in comments_tag if comments_tag]
     book = {'book_id': book_id,
             'author': author,
             'title': title,
