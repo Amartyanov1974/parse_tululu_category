@@ -5,12 +5,12 @@
 python3 ./parse_tululu_category.py -h
 ```
 ```
-usage: parse_tululu_category.py [-h] [--start_page START_PAGE] [--end_page END_PAGE] [--dest_folder DEST_FOLDER]
-                                [--skip_imgs] [--skip_txt] [--all_book] [--json_path JSON_PATH]
+usage: parse_tululu_category.py [-h] [--start_page START_PAGE] [--end_page END_PAGE] [--dest_folder DEST_FOLDER] [--skip_imgs]
+                                [--skip_txt] [--json_path JSON_PATH]
 
 Программа для скачивания книг с сайта https://tululu.org из командной строки
 
-options:
+optional arguments:
   -h, --help            show this help message and exit
   --start_page START_PAGE
                         Задайте первую страницу сайта c книгами
@@ -19,16 +19,15 @@ options:
                         Путь к каталогу с результатами парсинга: картинкам, книгам, JSON.
   --skip_imgs           Не скачивать картинки
   --skip_txt            Не скачивать книги
-  --all_book            Скачать все книги из этой категории
   --json_path JSON_PATH
                         Укажите свой путь к *.json файлу с результатами
 
 ```
 
-По умолчанию заданы следующие параметры `start_page = 1`, `end_page = 1`, `skip_imgs = False`, `skip_txt = False`, `all_book = False`,
+По умолчанию заданы следующие параметры `start_page = 1`, `skip_imgs = False`, `skip_txt = False`,
 `dest_folder = 'books_folder'`, `json_path = ''`.
-Параметр `all_book` имеет приоритет перед параметром `end_page` - будут скачиваться книги до последней страницы сайта.
-Программа парсит сайт, для получения списка книг, а потом каждую веб страницу книги и сохраняет книгу, ее описание, жанр, комментарии, обложку. 
+Параметр `end_page` по умолчанию равен последней странице сайта с книгами.
+Программа парсит сайт, для получения списка книг, а потом каждую веб страницу книги и сохраняет книгу, ее описание, жанр, комментарии, обложку.
 В директории с программой создаются (если они отсутсвовали) каталоги books, куда скачиваются книги,  и images, где сохраняются обложки книг.
 В отдельный файл формата json сохраняются описания книг.
 
