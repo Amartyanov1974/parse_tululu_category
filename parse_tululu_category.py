@@ -110,14 +110,14 @@ def get_books_ids(start_page, end_page, all_book):
     response = requests.get(category_url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    pages = int(soup.select('a.npage')[-1].text)
+    page_count = int(soup.select('a.npage')[-1].text)
     book_ids = []
     if all_book:
-        end_page = pages+1
+        end_page = page_count+1
     else:
         end_page += 1
-    if end_page > pages:
-        end_page = pages
+    if end_page > page_count:
+        end_page = page_count
     for page in range(start_page, end_page):
         page_url = urljoin(category_url, str(page))
         response = requests.get(page_url)
