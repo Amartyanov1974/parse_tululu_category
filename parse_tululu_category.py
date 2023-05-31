@@ -39,25 +39,23 @@ def check_for_redirect(response):
         raise requests.HTTPError
 
 
-def download_txt(url, book, dest_folder, payload):
+def download_txt(url, filename, dest_folder, payload):
     folder = f'{dest_folder}/books'
     os.makedirs(folder, exist_ok=True)
     response = requests.get(url, params=payload)
     response.raise_for_status()
     check_for_redirect(response)
-    filename = f'{book["book_id"]}.{sanitize_filename(book["title"])}.txt'
     filepath = os.path.join(folder, filename)
     with open(filepath, 'wb') as file:
         file.write(response.content)
 
 
-def download_img(url, book, dest_folder):
+def download_img(url, filename, dest_folder):
     folder = f'{dest_folder}/images'
     os.makedirs(folder, exist_ok=True)
     response = requests.get(url)
     response.raise_for_status()
     check_for_redirect(response)
-    filename = f'{book["image_src"].split("/")[1]}'
     filepath = os.path.join(folder, filename)
     with open(filepath, 'wb') as file:
         file.write(response.content)
@@ -165,9 +163,11 @@ def main():
             full_img_url = urljoin(title_url, book['img_url'])
             try:
                 if not skip_txt:
-                    download_txt(file_url, book, dest_folder, payload)
+                    filename = f'{book["book_id"]}.{sanitize_filename(book["title"])}.txt'
+                    download_txt(file_url, filename, dest_folder, payload)
                 if not skip_imgs:
-                    download_img(full_img_url, book, dest_folder)
+                    filename = f'{book["image_src"].split("/")[1]}'
+                    download_img(full_img_url, filename, dest_folder)
                 message = f'Книга: {book["title"]}'
                 descriptions.append(book)
             except requests.HTTPError:
