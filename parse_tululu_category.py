@@ -136,10 +136,21 @@ def main():
         end_page = page_count
     book_ids = []
     for page in range(start_page, end_page + 1):
-        try:
-            book_ids += get_books_ids(category_url, page)
-        except requests.HTTPError:
-            print('Страница отсутствует')
+        while True:
+            try:
+                book_ids += get_books_ids(category_url, page)
+                message = f'Получены id книг с {page} страницы сайта'
+            except requests.HTTPError:
+                print('Страница отсутствует')
+            except requests.exceptions.ConnectionError:
+                if message == 'Нет соединения':
+                    time.sleep(60)
+                else:
+                    message = 'Нет соединения'
+                print(message)
+                continue
+            print(message)
+            break
     dest_folder = args.dest_folder
     skip_imgs, skip_txt = args.skip_imgs, args.skip_txt
     json_path = args.json_path
@@ -154,6 +165,7 @@ def main():
                 response = requests.get(title_url)
                 response.raise_for_status()
                 check_for_redirect(response)
+                message = f'Страница книги с id = {book_id} существует'
             except requests.HTTPError:
                 print('Страница отсутствует')
                 break
@@ -164,6 +176,7 @@ def main():
                     message = 'Нет соединения'
                 print(message)
                 continue
+            print(message)
             soup = BeautifulSoup(response.text, 'lxml')
             book = parse_book_page(book_id, soup)
             full_img_url = urljoin(title_url, book['img_url'])
