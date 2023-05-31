@@ -10,13 +10,13 @@ from urllib.parse import urljoin
 URL = 'https://tululu.org'
 
 
-def read_args():
+def read_args(page_count):
     text = 'Программа для скачивания книг с сайта https://tululu.org из командной строки'
     parser = argparse.ArgumentParser(description=text)
     text = 'Задайте первую страницу сайта c книгами'
     parser.add_argument('--start_page', type=int, default=1, help=text)
     text = 'Задайте последнюю страницу сайта  c книгами'
-    parser.add_argument('--end_page', type=int, default=2, help=text)
+    parser.add_argument('--end_page', type=int, default=page_count, help=text)
     text = 'Путь к каталогу с результатами парсинга: картинкам, книгам, JSON.'
     parser.add_argument('--dest_folder', default='books_folder', help=text)
     text = 'Не скачивать картинки'
@@ -24,9 +24,6 @@ def read_args():
                         default=False, help=text)
     text = 'Не скачивать книги'
     parser.add_argument('--skip_txt', action='store_true',
-                        default=False, help=text)
-    text = 'Скачать все книги из этой категории'
-    parser.add_argument('--all_book', action='store_true',
                         default=False, help=text)
     text = 'Укажите свой путь к *.json файлу с результатами'
     parser.add_argument('--json_path', default='', help=text)
@@ -101,39 +98,40 @@ def parse_book_page(book_id, soup, directory='books/'):
     return book
 
 
-def get_books_ids(start_page, end_page, all_book):
-    # Категория: научная фантастика
-    category = '/l55/'
-    category_url = urljoin(URL, category)
+def get_page_count(category_url):
     response = requests.get(category_url)
     response.raise_for_status()
     soup = BeautifulSoup(response.text, 'lxml')
-    page_count = int(soup.select('a.npage')[-1].text)
+    return int(soup.select('a.npage')[-1].text)
+
+
+def get_books_ids(category_url, page):
     book_ids = []
-    if all_book:
-        end_page = page_count+1
-    else:
-        end_page += 1
-    if end_page > page_count:
-        end_page = page_count
-    for page in range(start_page, end_page):
-        page_url = urljoin(category_url, str(page))
-        response = requests.get(page_url)
-        response.raise_for_status()
-        soup = BeautifulSoup(response.text, 'lxml')
-        a_tags = soup.select('#content .bookimage a')
-        for a_tag in a_tags:
-            book_id = a_tag['href'].replace('/', '').replace('b', '')
-            book_ids.append(book_id)
+    page_url = urljoin(category_url, str(page))
+    response = requests.get(page_url)
+    response.raise_for_status()
+    check_for_redirect(response)
+    soup = BeautifulSoup(response.text, 'lxml')
+    a_tags = soup.select('#content .bookimage a')
+    for a_tag in a_tags:
+        book_id = a_tag['href'].replace('/', '').replace('b', '')
+        book_ids.append(book_id)
     return book_ids
 
 
 def main():
-    args = read_args()
+    # Категория: научная фантастика
+    category = '/l55/'
+    category_url = urljoin(URL, category)
+    page_count = get_page_count(category_url)
+    args = read_args(page_count)
     message = ''
     start_page, end_page = args.start_page, args.end_page
-    all_book = args.all_book
-    book_ids = get_books_ids(start_page, end_page, all_book)
+    if end_page > page_count:
+        end_page = page_count
+    book_ids = []
+    for page in range(start_page, end_page + 1):
+        book_ids += get_books_ids(category_url, page)
     dest_folder = args.dest_folder
     skip_imgs, skip_txt = args.skip_imgs, args.skip_txt
     json_path = args.json_path
