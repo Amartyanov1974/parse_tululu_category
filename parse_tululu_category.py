@@ -101,6 +101,7 @@ def parse_book_page(book_id, soup, directory='books/'):
 def get_page_count(category_url):
     response = requests.get(category_url)
     response.raise_for_status()
+    check_for_redirect(response)
     soup = BeautifulSoup(response.text, 'lxml')
     return int(soup.select('a.npage')[-1].text)
 
@@ -123,7 +124,11 @@ def main():
     # Категория: научная фантастика
     category = '/l55/'
     category_url = urljoin(URL, category)
-    page_count = get_page_count(category_url)
+    try:
+        page_count = get_page_count(category_url)
+    except requests.HTTPError:
+        print('Страница отсутствует')
+        exit()
     args = read_args(page_count)
     message = ''
     start_page, end_page = args.start_page, args.end_page
@@ -131,7 +136,10 @@ def main():
         end_page = page_count
     book_ids = []
     for page in range(start_page, end_page + 1):
-        book_ids += get_books_ids(category_url, page)
+        try:
+            book_ids += get_books_ids(category_url, page)
+        except requests.HTTPError:
+            print('Страница отсутствует')
     dest_folder = args.dest_folder
     skip_imgs, skip_txt = args.skip_imgs, args.skip_txt
     json_path = args.json_path
