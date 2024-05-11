@@ -1,4 +1,4 @@
-requests==2.21.0
-bs4==0.0.1
-pathvalidate==2.5.2
-argparse==1.4.0
+bs4==0.0.2
+lxml==5.2.1
+pathvalidate==3.2.0
+requests==2.31.0
