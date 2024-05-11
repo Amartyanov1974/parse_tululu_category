@@ -1,9 +1,10 @@
-import requests
+import argparse
+import json
 import os
+
 from bs4 import BeautifulSoup
 from pathvalidate import sanitize_filename
-import json
-import argparse
+import requests
 from urllib.parse import urljoin
 
 
